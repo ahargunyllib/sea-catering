@@ -57,7 +57,7 @@ To run the application in Docker, you can use the provided `docker-compose.yml` 
 cp apps/server/.env.example apps/server/.env
 cp apps/web/.env.example apps/web/.env
 
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 3. Apply the database schema:
