@@ -48,7 +48,28 @@ Open [http://localhost:3001](http://localhost:3001) in your browser to see the w
 
 The API is running at [http://localhost:3000](http://localhost:3000).
 
+## Run in Docker (Production)
+To run the application in Docker, you can use the provided `docker-compose.yml` file.
+1. Make sure you have Docker installed.
+2. Build and start the containers:
 
+```bash
+cp apps/server/.env.example apps/server/.env
+cp apps/web/.env.example apps/web/.env
+
+docker-compose up -d --build
+```
+
+3. Apply the database schema:
+
+Change the database host in `apps/server/.env` to `localhost` (the service name in Docker Compose).
+
+Then run the following command to push the schema:
+
+```bash
+pnpm db:push
+```
+4. Access the web application at [http://localhost:3001](http://localhost:3001) and the API at [http://localhost:3000](http://localhost:3000).
 
 ## Project Structure
 

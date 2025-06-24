@@ -1,0 +1,51 @@
+services:
+  server:
+    build:
+      context: apps/server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - network
+    restart: on-failure
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    networks:
+      - network
+    restart: on-failure
+  db:
+    image: postgres:16.1-alpine
+    container_name: postgresdb
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=ahargunyllib
+      - POSTGRES_PASSWORD=ahargunyllib
+      - POSTGRES_DB=sea_catering
+      - PORT=5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ahargunyllib -d sea_catering'"]
+      start_period: 10s
+      start_interval: 5s
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres:
+    driver: local
+
+networks:
+  network:
+    driver: bridge
