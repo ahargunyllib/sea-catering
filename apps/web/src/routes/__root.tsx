@@ -1,4 +1,3 @@
-import Header from "@/shared/components/header";
 import Loader from "@/shared/components/loader";
 import { ThemeProvider } from "@/shared/components/theme-provider";
 import { Toaster } from "@/shared/components/ui/sonner";
@@ -61,11 +60,8 @@ function RootComponent() {
 	return (
 		<>
 			<HeadContent />
-			<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
-					{isFetching ? <Loader /> : <Outlet />}
-				</div>
+			<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+				{isFetching ? <Loader /> : <Outlet />}
 				<Toaster richColors />
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />
