@@ -35,25 +35,23 @@ export default function UserMenu() {
 			<DropdownMenuContent className="bg-card">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>{session.user.email}</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Button
-						variant="destructive"
-						className="w-full"
-						onClick={() => {
-							authClient.signOut({
-								fetchOptions: {
-									onSuccess: () => {
-										navigate({
-											to: "/",
-										});
-									},
+					<Link to="/dashboard">Dashboard</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => {
+						authClient.signOut({
+							fetchOptions: {
+								onSuccess: () => {
+									navigate({
+										to: "/",
+									});
 								},
-							});
-						}}
-					>
-						Sign Out
-					</Button>
+							},
+						});
+					}}
+				>
+					Sign Out
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
