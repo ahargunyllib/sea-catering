@@ -49,7 +49,7 @@ Open [http://localhost:3001](http://localhost:3001) in your browser to see the w
 The API is running at [http://localhost:3000](http://localhost:3000).
 
 ## Run in Docker (Production)
-To run the application in Docker, you can use the provided `docker-compose.yml` file.
+To run the application in Docker, you can use the provided `dev.docker-compose.yml` file.
 1. Make sure you have Docker installed.
 2. Build and start the containers:
 
