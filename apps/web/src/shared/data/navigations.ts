@@ -10,24 +10,21 @@ export const navigationItems = [
 		description: "Simple, transparent pricing.",
 	},
 	{
-		title: "Product",
-		description: "Managing a small business today is already tough.",
+		title: "Meal Plans",
+		href: "/meal-plans",
+		description: "Explore our meal plans tailored to your health goals.",
 		items: [
 			{
-				title: "Reports",
-				href: "/reports",
+				title: "Diet Meal Plans",
+				href: "/meal-plans?type=diet",
 			},
 			{
-				title: "Statistics",
-				href: "/statistics",
+				title: "Protein Meal Plans",
+				href: "/meal-plans?type=protein",
 			},
 			{
-				title: "Dashboards",
-				href: "/dashboards",
-			},
-			{
-				title: "Recordings",
-				href: "/recordings",
+				title: "Royal Meal Plans",
+				href: "/meal-plans?type=royal",
 			},
 		],
 	},
