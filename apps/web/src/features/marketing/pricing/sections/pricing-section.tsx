@@ -1,9 +1,9 @@
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { plans } from "@/shared/data/plans";
+import { pricings } from "@/shared/data/pricings";
+import { cn } from "@/shared/lib/utils";
 import { CheckCircle } from "lucide-react";
-import { cn } from "../../../../shared/lib/utils";
 
 export default function PricingSection() {
 	return (
@@ -18,35 +18,39 @@ export default function PricingSection() {
 					</p>
 				</div>
 				<div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
-					{plans.map((plan, index) => (
+					{pricings.map((pricing, index) => (
 						<Card
 							// biome-ignore lint/suspicious/noArrayIndexKey: Using index as key is acceptable here since plans are static and won't change.
 							key={index}
 							className={cn(
 								"relative border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-500 hover:scale-105 hover:bg-white/10",
-								plan.popular && "ring-2 ring-emerald-500/50",
+								pricing.popular && "ring-2 ring-emerald-500/50",
 							)}
 						>
-							{plan.popular && (
+							{pricing.popular && (
 								<Badge className="-top-3 -translate-x-1/2 absolute left-1/2 transform bg-primary text-primary-foreground">
 									Most Popular
 								</Badge>
 							)}
 							<CardContent className="p-8">
 								<div className="mb-8 text-center">
-									<h3 className="mb-2 font-bold text-2xl">{plan.name}</h3>
-									<p className="mb-4 text-muted-foreground">{plan.subtitle}</p>
+									<h3 className="mb-2 font-bold text-2xl">{pricing.name}</h3>
+									<p className="mb-4 text-muted-foreground">
+										{pricing.subtitle}
+									</p>
 									<div className="mb-2 flex items-baseline justify-center">
-										<span className="font-black text-4xl">Rp{plan.price}</span>
+										<span className="font-black text-4xl">
+											Rp{pricing.price}
+										</span>
 										<span className="ml-2 text-muted-foreground">/meal</span>
 									</div>
 									<p className="text-muted-foreground text-sm">
-										{plan.description}
+										{pricing.description}
 									</p>
 								</div>
 
 								<ul className="mb-8 space-y-3">
-									{plan.features.map((feature, featureIndex) => (
+									{pricing.features.map((feature, featureIndex) => (
 										<li
 											// biome-ignore lint/suspicious/noArrayIndexKey: Using index as key is acceptable here since features are static and won't change.
 											key={featureIndex}

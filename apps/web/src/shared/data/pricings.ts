@@ -1,4 +1,4 @@
-export const plans = [
+export const pricings = [
 	{
 		name: "Starter",
 		subtitle: "Diet",
