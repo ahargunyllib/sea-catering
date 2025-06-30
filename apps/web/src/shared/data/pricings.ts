@@ -1,17 +1,19 @@
 export const pricings = [
 	{
+		idx: 1,
 		name: "Starter",
 		subtitle: "Diet",
-		price: "30K",
+		price: 30000,
 		description: "Perfect for beginners",
 		features: ["Standard delivery", "Email support"],
 		gradient: "from-gray-500 to-gray-600",
 		popular: false,
 	},
 	{
+		idx: 2,
 		name: "Pro",
 		subtitle: "Protein",
-		price: "40K",
+		price: 40000,
 		description: "For active lifestyles",
 		features: [
 			"AI meal recommendations",
@@ -23,9 +25,10 @@ export const pricings = [
 		popular: true,
 	},
 	{
+		idx: 3,
 		name: "Enterprise",
 		subtitle: "Royal",
-		price: "60K",
+		price: 60000,
 		description: "Premium everything",
 		features: [
 			"Advanced AI matching",
