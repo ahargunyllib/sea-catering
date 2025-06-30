@@ -3,6 +3,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { pricings } from "@/shared/data/pricings";
 import { cn } from "@/shared/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { CheckCircle } from "lucide-react";
 
 export default function PricingSection() {
@@ -62,7 +63,9 @@ export default function PricingSection() {
 									))}
 								</ul>
 
-								<Button className="w-full">Get Started</Button>
+								<Button className="w-full" asChild>
+									<Link to="/subscribe">Get Started</Link>
+								</Button>
 							</CardContent>
 						</Card>
 					))}
