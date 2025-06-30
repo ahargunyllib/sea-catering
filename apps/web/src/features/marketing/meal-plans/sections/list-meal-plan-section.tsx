@@ -64,11 +64,6 @@ export default function ListMealPlanSection() {
 							</div>
 							<div className="absolute top-4 right-4">
 								<div className="space-x-2 rounded-full bg-foreground/50 px-2 py-1 text-background text-sm backdrop-blur-sm">
-									{meal.originalPrice && (
-										<span className="text-background/50 line-through">
-											Rp{meal.originalPrice.toLocaleString()}
-										</span>
-									)}
 									<span className="font-bold">
 										Rp{meal.price.toLocaleString()}
 									</span>
@@ -138,7 +133,18 @@ export default function ListMealPlanSection() {
 											className="h-64 w-full rounded-lg object-cover"
 										/>
 
-										<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+										<h4 className="font-semibold text-xl">
+											Rp{meal.price.toLocaleString()}
+										</h4>
+
+										<div className="space-y-2">
+											<h4 className="font-semibold">Description</h4>
+											<p className="text-muted-foreground">
+												{meal.description}
+											</p>
+										</div>
+
+										<div className="flex flex-row items-center justify-between gap-4">
 											<div className="text-center">
 												<div className="font-bold text-2xl text-yellow-400">
 													{meal.rating}
@@ -171,13 +177,6 @@ export default function ListMealPlanSection() {
 													Protein
 												</div>
 											</div>
-										</div>
-
-										<div className="space-y-2">
-											<h4 className="font-semibold">Description</h4>
-											<p className="text-muted-foreground">
-												{meal.description}
-											</p>
 										</div>
 
 										<div className="space-y-2">
