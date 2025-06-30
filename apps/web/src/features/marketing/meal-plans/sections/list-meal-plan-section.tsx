@@ -111,16 +111,11 @@ export default function ListMealPlanSection() {
 							</div>
 
 							<div className="flex flex-wrap gap-1">
-								{meal.dietaryTags.slice(0, 3).map((tag) => (
+								{meal.dietaryTags.map((tag) => (
 									<Badge key={tag} variant="secondary" className="text-xs">
 										{tag}
 									</Badge>
 								))}
-								{meal.dietaryTags.length > 3 && (
-									<Badge className="text-xs" variant="secondary">
-										+{meal.dietaryTags.length - 3}
-									</Badge>
-								)}
 							</div>
 
 							<Dialog>
