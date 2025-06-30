@@ -41,7 +41,7 @@ export default function PricingSection() {
 									</p>
 									<div className="mb-2 flex items-baseline justify-center">
 										<span className="font-black text-4xl">
-											Rp{pricing.price}
+											Rp{pricing.price.toLocaleString()}
 										</span>
 										<span className="ml-2 text-muted-foreground">/meal</span>
 									</div>
