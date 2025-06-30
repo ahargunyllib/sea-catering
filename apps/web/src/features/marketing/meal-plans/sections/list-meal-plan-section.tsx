@@ -189,10 +189,6 @@ export default function ListMealPlanSection() {
 												))}
 											</div>
 										</div>
-
-										<Button className="w-full">
-											Add to Cart - Rp{meal.price.toLocaleString()}
-										</Button>
 									</div>
 								</DialogContent>
 							</Dialog>
