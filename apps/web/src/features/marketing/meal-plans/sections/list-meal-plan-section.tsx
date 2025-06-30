@@ -4,14 +4,13 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
 } from "@/shared/components/ui/dialog";
 import { mealPlans } from "@/shared/data/meal-plans";
 import { getRouteApi } from "@tanstack/react-router";
-import { Clock, Flame, Search, Star, Users, XIcon } from "lucide-react";
+import { Search, Star, XIcon } from "lucide-react";
 
 const route = getRouteApi("/meal-plans");
 
@@ -62,22 +61,12 @@ export default function ListMealPlanSection() {
 									</Badge>
 								)}
 							</div>
-							<div className="absolute top-4 right-4">
-								<div className="space-x-2 rounded-full bg-foreground/50 px-2 py-1 text-background text-sm backdrop-blur-sm">
-									<span className="font-bold">
-										Rp{meal.price.toLocaleString()}
-									</span>
-								</div>
-							</div>
 						</div>
 
 						<CardContent className="space-y-4 p-6">
 							<div className="flex items-start justify-between">
 								<div className="space-y-1">
 									<h3 className="font-bold text-xl">{meal.name}</h3>
-									<p className="text-muted-foreground text-sm">
-										by {meal.chef}
-									</p>
 								</div>
 								<div className="flex items-center space-x-1">
 									<Star className="h-4 w-4 fill-current text-yellow-400" />
@@ -89,21 +78,6 @@ export default function ListMealPlanSection() {
 							</div>
 
 							<p className="line-clamp-2 text-sm">{meal.description}</p>
-
-							<div className="flex items-center gap-4 text-muted-foreground text-sm">
-								<div className="flex items-center gap-x-1">
-									<Clock className="h-4 w-4" />
-									{meal.prepTime}m
-								</div>
-								<div className="flex items-center gap-x-1">
-									<Users className="h-4 w-4" />
-									{meal.servings}
-								</div>
-								<div className="flex items-center gap-x-1">
-									<Flame className="h-4 w-4" />
-									{meal.calories} cal
-								</div>
-							</div>
 
 							<div className="flex flex-wrap gap-1">
 								{meal.dietaryTags.map((tag) => (
@@ -122,9 +96,6 @@ export default function ListMealPlanSection() {
 										<DialogTitle className="font-bold text-2xl">
 											{meal.name}
 										</DialogTitle>
-										<DialogDescription className="text-muted-foreground">
-											by {meal.chef}
-										</DialogDescription>
 									</DialogHeader>
 									<div className="space-y-6">
 										<img
@@ -132,10 +103,6 @@ export default function ListMealPlanSection() {
 											alt={meal.name}
 											className="h-64 w-full rounded-lg object-cover"
 										/>
-
-										<h4 className="font-semibold text-xl">
-											Rp{meal.price.toLocaleString()}
-										</h4>
 
 										<div className="space-y-2">
 											<h4 className="font-semibold">Description</h4>
@@ -151,14 +118,6 @@ export default function ListMealPlanSection() {
 												</div>
 												<div className="text-muted-foreground text-sm">
 													Rating
-												</div>
-											</div>
-											<div className="text-center">
-												<div className="font-bold text-2xl text-blue-400">
-													{meal.prepTime}m
-												</div>
-												<div className="text-muted-foreground text-sm">
-													Prep Time
 												</div>
 											</div>
 											<div className="text-center">
