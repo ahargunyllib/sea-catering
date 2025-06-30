@@ -26,11 +26,13 @@ export default function Header() {
 							{navigationItems.map((item) => (
 								<NavigationMenuItem key={item.title}>
 									{item.href ? (
-										<NavigationMenuLink
-											className="font-medium text-sm hover:cursor-default"
-											href={item.href}
-										>
-											{item.title}
+										<NavigationMenuLink asChild>
+											<Link
+												to={item.href}
+												className="font-medium text-sm hover:cursor-default"
+											>
+												{item.title}
+											</Link>
 										</NavigationMenuLink>
 									) : (
 										<>
@@ -49,13 +51,14 @@ export default function Header() {
 													</div>
 													<div className="flex h-full flex-col justify-end text-sm">
 														{item.items?.map((subItem) => (
-															<NavigationMenuLink
-																href={subItem.href}
-																key={subItem.title}
-																className="flex flex-row items-center justify-between rounded px-4 py-2 hover:bg-muted"
-															>
-																<span>{subItem.title}</span>
-																<MoveRight className="h-4 w-4 text-muted-foreground" />
+															<NavigationMenuLink key={subItem.title} asChild>
+																<Link
+																	className="flex flex-row items-center justify-between rounded px-4 py-2 hover:bg-muted"
+																	to={subItem.href}
+																>
+																	<span>{subItem.title}</span>
+																	<MoveRight className="h-4 w-4 text-muted-foreground" />
+																</Link>
 															</NavigationMenuLink>
 														))}
 													</div>
