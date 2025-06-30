@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MealPlansRouteImport } from './routes/meal-plans'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SubscribeRoute = SubscribeRouteImport.update({
+  id: '/subscribe',
+  path: '/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/pricing': typeof PricingRoute
+  '/subscribe': typeof SubscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/pricing': typeof PricingRoute
+  '/subscribe': typeof SubscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,27 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/pricing': typeof PricingRoute
+  '/subscribe': typeof SubscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/meal-plans' | '/pricing'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/meal-plans'
+    | '/pricing'
+    | '/subscribe'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/meal-plans' | '/pricing'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/meal-plans' | '/pricing'
+  to: '/' | '/dashboard' | '/login' | '/meal-plans' | '/pricing' | '/subscribe'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/meal-plans'
+    | '/pricing'
+    | '/subscribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +99,18 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   PricingRoute: typeof PricingRoute
+  SubscribeRoute: typeof SubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/subscribe': {
+      id: '/subscribe'
+      path: '/subscribe'
+      fullPath: '/subscribe'
+      preLoaderRoute: typeof SubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -125,6 +155,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   PricingRoute: PricingRoute,
+  SubscribeRoute: SubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
