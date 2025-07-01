@@ -1,0 +1,42 @@
+export const pricings = [
+	{
+		idx: 1,
+		name: "Starter",
+		subtitle: "Diet",
+		price: 30000,
+		description: "Perfect for beginners",
+		features: ["Standard delivery", "Email support"],
+		gradient: "from-gray-500 to-gray-600",
+		popular: false,
+	},
+	{
+		idx: 2,
+		name: "Pro",
+		subtitle: "Protein",
+		price: 40000,
+		description: "For active lifestyles",
+		features: [
+			"AI meal recommendations",
+			"Detailed nutrition analytics",
+			"Priority delivery",
+			"24/7 chat support",
+		],
+		gradient: "from-emerald-500 to-teal-500",
+		popular: true,
+	},
+	{
+		idx: 3,
+		name: "Enterprise",
+		subtitle: "Royal",
+		price: 60000,
+		description: "Premium everything",
+		features: [
+			"Advanced AI matching",
+			"Exclusive meal plans",
+			"Same-hour delivery",
+			"Health insights dashboard",
+		],
+		gradient: "from-purple-500 to-pink-500",
+		popular: false,
+	},
+];
