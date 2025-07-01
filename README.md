@@ -1,6 +1,7 @@
-# sea-catering
+# SEA Catering
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, TRPC, and more.
+SEA Catering is a modern web application for managing catering services, built with a focus on type safety and developer experience. It leverages the latest technologies including TypeScript, TanStack Router, TailwindCSS, shadcn/ui, Hono, tRPC, Bun, Drizzle ORM, and PostgreSQL.
+This project is designed to be a robust and scalable solution for catering management, providing a seamless experience for both developers and end-users.
 
 ## Features
 
@@ -49,7 +50,7 @@ Open [http://localhost:3001](http://localhost:3001) in your browser to see the w
 The API is running at [http://localhost:3000](http://localhost:3000).
 
 ## Run in Docker (Production)
-To run the application in Docker, you can use the provided `dev.docker-compose.yml` file.
+To run the application in Docker, you can use the provided `prod.docker-compose.yml` file.
 1. Make sure you have Docker installed.
 2. Build and start the containers:
 
