@@ -28,10 +28,15 @@ import { MealTypes } from "@/shared/data/meal-types";
 import { pricings } from "@/shared/data/pricings";
 import { WeekDays } from "@/shared/data/week-days";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar, Star } from "lucide-react";
+import { Calendar, PauseIcon, PlayIcon, Star, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 
 const EditTestimonalSchema = z.object({
 	stars: z.number().min(1).max(5),
@@ -47,12 +52,16 @@ export default function OverviewSection() {
 		deliveryDays: number[];
 		totalPrice: number;
 		createdAt: string;
+		pausedFrom: string | null;
+		pausedTo: string | null;
 	} | null>({
 		plan: 1,
 		mealTypes: [1, 2, 3],
 		deliveryDays: [1, 2, 3, 4, 5, 6, 7, 8],
 		totalPrice: 40000,
 		createdAt: "2025-06-30T00:00:00Z",
+		pausedFrom: null,
+		pausedTo: null,
 	});
 
 	const [historySubscription] = useState([
@@ -124,6 +133,17 @@ export default function OverviewSection() {
 		return undefined;
 	}, [subscription]);
 
+	const isPaused = useMemo(() => {
+		if (!subscription) return false;
+		if (!subscription.pausedFrom || !subscription.pausedTo) return false;
+
+		const pausedFrom = new Date(subscription.pausedFrom);
+		const pausedTo = new Date(subscription.pausedTo);
+		const now = new Date();
+
+		return now >= pausedFrom && now <= pausedTo;
+	}, [subscription]);
+
 	return (
 		<div className="mx-auto max-w-4xl space-y-6">
 			{/* Active Subscription Card */}
@@ -136,9 +156,41 @@ export default function OverviewSection() {
 							</CardTitle>
 							<CardDescription>Your current meal plan details</CardDescription>
 						</div>
-						<Badge variant={subscription ? "default" : "secondary"}>
-							{subscription ? "Active" : "Inactive"}
-						</Badge>
+						<div className="flex flex-row items-center gap-4">
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button variant="destructive" size="icon">
+										<Trash2Icon />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p className="text-sm">Cancel Subscription</p>
+								</TooltipContent>
+							</Tooltip>
+							{isPaused ? (
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant="outline" size="icon">
+											<PlayIcon />
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p className="text-sm">Resume Subscription</p>
+									</TooltipContent>
+								</Tooltip>
+							) : (
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant="outline" size="icon">
+											<PauseIcon />
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p className="text-sm">Pause Subscription</p>
+									</TooltipContent>
+								</Tooltip>
+							)}
+						</div>
 					</div>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -182,16 +234,32 @@ export default function OverviewSection() {
 									<span className="font-medium text-gray-700">
 										Next Delivery:
 									</span>
-									<p className="flex items-center gap-2 font-semibold text-lg">
-										<Calendar className="h-4 w-4" />
-										{!nextDeliveryDate && "No upcoming deliveries"}
-										{nextDeliveryDate.toLocaleDateString("id-ID", {
-											weekday: "long",
-											year: "numeric",
-											month: "long",
-											day: "numeric",
-										})}
-									</p>
+
+									{subscription && isPaused && subscription.pausedTo ? (
+										<p className="flex items-center gap-2 font-semibold text-lg text-red-600">
+											Paused until{" "}
+											{new Date(subscription.pausedTo).toLocaleDateString(
+												"id-ID",
+												{
+													weekday: "long",
+													year: "numeric",
+													month: "long",
+													day: "numeric",
+												},
+											)}
+										</p>
+									) : (
+										<p className="flex items-center gap-2 font-semibold text-lg">
+											<Calendar className="h-4 w-4" />
+											{!nextDeliveryDate && "No upcoming deliveries"}
+											{nextDeliveryDate.toLocaleDateString("id-ID", {
+												weekday: "long",
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											})}
+										</p>
+									)}
 								</div>
 							)}
 
