@@ -31,11 +31,14 @@ import { pricings } from "@/shared/data/pricings";
 import { WeekDays } from "@/shared/data/week-days";
 import { useFormId } from "@/shared/hooks/use-form-id";
 import { cn } from "@/shared/lib/utils";
+import { trpc } from "@/shared/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { type Tag, TagInput } from "emblor";
 import { InfoIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod/v4";
 
 const subscribechema = z.object({
@@ -67,11 +70,6 @@ export default function FormSection() {
 			allergies: [],
 			dietaryRestrictions: [],
 		},
-	});
-
-	const onSubmitHandler = form.handleSubmit((data) => {
-		console.log("Form submitted with data:", data);
-		// Handle form submission logic here
 	});
 
 	const formIds = useFormId([
@@ -106,6 +104,19 @@ export default function FormSection() {
 			plan.price * mealTypes.length * deliveryDays.length * 4.3,
 		);
 	}, [plan, mealTypes.length, deliveryDays.length]);
+
+	const { mutate, isPending } = useMutation(trpc.subscribe.mutationOptions());
+
+	const onSubmitHandler = form.handleSubmit((data) => {
+		mutate(data, {
+			onSuccess: (res) => {
+				form.reset();
+				setAllergies([]);
+				setActiveTagIndex(null);
+				toast.success(res.message);
+			},
+		});
+	});
 
 	return (
 		<div className="mx-auto max-w-4xl">
@@ -475,7 +486,8 @@ export default function FormSection() {
 							disabled={
 								!selectedPlan ||
 								deliveryDays.length === 0 ||
-								mealTypes.length === 0
+								mealTypes.length === 0 ||
+								isPending
 							}
 						>
 							Subscribe Now - Rp {totalPrice.toLocaleString("id-ID")}

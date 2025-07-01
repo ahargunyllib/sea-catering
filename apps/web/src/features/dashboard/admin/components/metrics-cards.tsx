@@ -4,17 +4,21 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/shared/components/ui/card";
+import { getRouteApi } from "@tanstack/react-router";
 import { DollarSign, RotateCcw, TrendingUp, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/shared/utils/trpc";
+
+const route = getRouteApi("/dashboard");
 
 export default function MetricsCards() {
-	const data = {
-		metrics: {
-			newSubscriptions: 47,
-			monthlyRevenue: 125400000,
-			reactivations: 8,
-			activeSubscriptions: 312,
-		},
-	};
+	const searchParams = route.useSearch();
+	const { data } = useQuery(
+		trpc.getMetrics.queryOptions({
+			startDate: searchParams.startDate || "2025-01-01",
+			endDate: searchParams.endDate || "2025-12-31",
+		}),
+	);
 
 	return (
 		<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
@@ -26,9 +30,7 @@ export default function MetricsCards() {
 					<Users className="h-4 w-4 text-muted-foreground" />
 				</CardHeader>
 				<CardContent>
-					<div className="font-bold text-2xl">
-						{data.metrics.newSubscriptions}
-					</div>
+					<div className="font-bold text-2xl">{data?.newSubscriptions}</div>
 					<p className="text-muted-foreground text-xs">This month</p>
 				</CardContent>
 			</Card>
@@ -40,7 +42,7 @@ export default function MetricsCards() {
 				</CardHeader>
 				<CardContent>
 					<div className="font-bold text-2xl">
-						Rp {data.metrics.monthlyRevenue.toLocaleString("id-ID")}
+						Rp {data?.monthlyRevenue.toLocaleString("id-ID")}
 					</div>
 					<p className="text-muted-foreground text-xs">+12% from last month</p>
 				</CardContent>
@@ -52,7 +54,7 @@ export default function MetricsCards() {
 					<RotateCcw className="h-4 w-4 text-muted-foreground" />
 				</CardHeader>
 				<CardContent>
-					<div className="font-bold text-2xl">{data.metrics.reactivations}</div>
+					<div className="font-bold text-2xl">{data?.reactivations}</div>
 					<p className="text-muted-foreground text-xs">This month</p>
 				</CardContent>
 			</Card>
@@ -65,9 +67,7 @@ export default function MetricsCards() {
 					<TrendingUp className="h-4 w-4 text-muted-foreground" />
 				</CardHeader>
 				<CardContent>
-					<div className="font-bold text-2xl">
-						{data.metrics.activeSubscriptions}
-					</div>
+					<div className="font-bold text-2xl">{data?.activeSubscriptions}</div>
 					<p className="text-muted-foreground text-xs">Total active</p>
 				</CardContent>
 			</Card>

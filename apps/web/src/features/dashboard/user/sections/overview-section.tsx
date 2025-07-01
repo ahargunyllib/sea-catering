@@ -1,5 +1,6 @@
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Calendar } from "@/shared/components/ui/calendar";
 import {
 	Card,
 	CardContent,
@@ -11,6 +12,7 @@ import {
 	Dialog,
 	DialogClose,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
@@ -21,22 +23,48 @@ import {
 	FormControl,
 	FormField,
 	FormItem,
+	FormLabel,
 	FormMessage,
 } from "@/shared/components/ui/form";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { MealTypes } from "@/shared/data/meal-types";
-import { pricings } from "@/shared/data/pricings";
-import { WeekDays } from "@/shared/data/week-days";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar, PauseIcon, PlayIcon, Star, Trash2Icon } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod/v4";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
+import { MealTypes } from "@/shared/data/meal-types";
+import { pricings } from "@/shared/data/pricings";
+import { WeekDays } from "@/shared/data/week-days";
+import { cn } from "@/shared/lib/utils";
+import { trpc } from "@/shared/utils/trpc";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+	CalendarIcon,
+	Loader2Icon,
+	PauseIcon,
+	PlayIcon,
+	Star,
+	Trash2Icon,
+} from "lucide-react";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod/v4";
+import {
+	AlertDialog,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "../../../../shared/components/ui/alert-dialog";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "../../../../shared/components/ui/popover";
 
 const EditTestimonalSchema = z.object({
 	stars: z.number().min(1).max(5),
@@ -45,60 +73,22 @@ const EditTestimonalSchema = z.object({
 
 type EditTestimonialRequest = z.infer<typeof EditTestimonalSchema>;
 
-export default function OverviewSection() {
-	const [subscription] = useState<{
-		plan: number;
-		mealTypes: number[];
-		deliveryDays: number[];
-		totalPrice: number;
-		createdAt: string;
-		pausedFrom: string | null;
-		pausedTo: string | null;
-	} | null>({
-		plan: 1,
-		mealTypes: [1, 2, 3],
-		deliveryDays: [1, 2, 3, 4, 5, 6, 7, 8],
-		totalPrice: 40000,
-		createdAt: "2025-06-30T00:00:00Z",
-		pausedFrom: null,
-		pausedTo: null,
-	});
+const PauseSubscriptionSchema = z.object({
+	pausedFrom: z.date(),
+	pausedTo: z.date(),
+});
 
-	const [historySubscription] = useState([
-		{
-			id: 1,
-			plan: 1,
-			mealTypes: [1, 2, 3],
-			deliveryDays: [1, 2, 3, 4, 5, 6],
-			totalPrice: 1720000,
-			testimonial: {
-				stars: 5,
-				content: "Great service and delicious meals!",
-			},
-			date: "2025-06-30T00:00:00Z",
-		},
-		{
-			id: 2,
-			plan: 2,
-			mealTypes: [2, 3],
-			deliveryDays: [1, 3, 5],
-			totalPrice: 600000,
-			testimonial: null,
-			date: "2025-07-01T00:00:00Z",
-		},
-		{
-			id: 3,
-			plan: 3,
-			mealTypes: [1, 2],
-			deliveryDays: [2, 4, 6],
-			totalPrice: 800000,
-			testimonial: {
-				stars: 4,
-				content: "The meals are healthy and filling.",
-			},
-			date: "2025-07-12T00:00:00Z",
-		},
-	]);
+type PauseSubscriptionRequest = z.infer<typeof PauseSubscriptionSchema>;
+
+export default function OverviewSection() {
+	const subscriptionData = useQuery(trpc.getCurrentSubscription.queryOptions());
+	const subscription = subscriptionData?.data?.subscription || null;
+
+	const historySubscriptionData = useQuery(
+		trpc.getHistoricalSubscriptions.queryOptions(),
+	);
+	const historySubscription =
+		historySubscriptionData?.data?.subscriptions || [];
 
 	const plan = useMemo(() => {
 		return pricings.find((p) => p.idx === subscription?.plan);
@@ -144,6 +134,40 @@ export default function OverviewSection() {
 		return now >= pausedFrom && now <= pausedTo;
 	}, [subscription]);
 
+	const { mutate: cancelSubscription, isPending: isPendingCancel } =
+		useMutation(trpc.cancelSubscription.mutationOptions());
+	const { mutate: pauseSubscription, isPending: isPendingPause } = useMutation(
+		trpc.pauseSubscription.mutationOptions(),
+	);
+	const { mutate: resumeSubscription, isPending: isPendingResume } =
+		useMutation(trpc.resumeSubscription.mutationOptions());
+
+	const form = useForm<PauseSubscriptionRequest>({
+		resolver: zodResolver(PauseSubscriptionSchema),
+		defaultValues: {
+			pausedFrom: new Date(),
+			pausedTo: new Date(),
+		},
+	});
+	const onPauseSubmit = form.handleSubmit((data) => {
+		if (!subscription || !data.pausedFrom || !data.pausedTo) return;
+
+		pauseSubscription(
+			{
+				subscriptionId: subscription.id,
+				pausedFrom: data.pausedFrom.toISOString(),
+				pausedTo: data.pausedTo.toISOString(),
+			},
+			{
+				onSuccess: (res) => {
+					form.reset();
+					toast.success(res.message);
+					subscriptionData.refetch();
+				},
+			},
+		);
+	});
+
 	return (
 		<div className="mx-auto max-w-4xl space-y-6">
 			{/* Active Subscription Card */}
@@ -157,21 +181,84 @@ export default function OverviewSection() {
 							<CardDescription>Your current meal plan details</CardDescription>
 						</div>
 						<div className="flex flex-row items-center gap-4">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant="destructive" size="icon">
-										<Trash2Icon />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p className="text-sm">Cancel Subscription</p>
-								</TooltipContent>
-							</Tooltip>
-							{isPaused ? (
+							{subscription && (
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="outline" size="icon">
-											<PlayIcon />
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button variant="destructive" size="icon">
+													<Trash2Icon />
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>
+														Are you sure you want to cancel your subscription?
+													</AlertDialogTitle>
+													<AlertDialogDescription>
+														This action cannot be undone. Your subscription will
+														be cancelled immediately, and you will not be
+														charged for the next billing cycle.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<Button
+														variant="outline"
+														onClick={() =>
+															cancelSubscription(
+																{
+																	subscriptionId: subscription.id,
+																},
+																{
+																	onSuccess: (res) => {
+																		toast.success(res.message);
+																		subscriptionData.refetch();
+																	},
+																},
+															)
+														}
+														disabled={isPendingCancel}
+													>
+														{isPendingCancel ? "Cancelling..." : "Yes, Cancel"}
+													</Button>
+													<AlertDialogTrigger asChild>
+														<Button variant="secondary">No, Go Back</Button>
+													</AlertDialogTrigger>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p className="text-sm">Cancel Subscription</p>
+									</TooltipContent>
+								</Tooltip>
+							)}
+							{!subscription ? null : isPaused ? (
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											variant="outline"
+											size="icon"
+											onClick={() => {
+												resumeSubscription(
+													{
+														subscriptionId: subscription.id,
+													},
+													{
+														onSuccess: (res) => {
+															toast.success(res.message);
+															subscriptionData.refetch();
+														},
+													},
+												);
+											}}
+											disabled={isPendingResume}
+										>
+											{isPendingResume ? (
+												<Loader2Icon className="animate-spin" />
+											) : (
+												<PlayIcon />
+											)}
 										</Button>
 									</TooltipTrigger>
 									<TooltipContent>
@@ -181,9 +268,132 @@ export default function OverviewSection() {
 							) : (
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="outline" size="icon">
-											<PauseIcon />
-										</Button>
+										<Dialog>
+											<DialogTrigger asChild>
+												<Button variant="outline" size="icon">
+													<PauseIcon />
+												</Button>
+											</DialogTrigger>
+											<DialogContent>
+												<DialogHeader>
+													<DialogTitle>Pause Subscription</DialogTitle>
+													<DialogDescription>
+														Are you sure you want to pause your subscription?
+														You can resume it later at any time.
+													</DialogDescription>
+												</DialogHeader>
+												<Form {...form}>
+													<form onSubmit={onPauseSubmit} className="space-y-4">
+														<FormField
+															control={form.control}
+															name="pausedFrom"
+															render={({ field }) => (
+																<FormItem>
+																	<FormLabel>Pause From (YYYY-MM-DD)</FormLabel>
+																	<Popover>
+																		<PopoverTrigger asChild>
+																			<FormControl>
+																				<Button
+																					variant={"outline"}
+																					className={cn(
+																						"w-[240px] pl-3 text-left font-normal",
+																						!field.value &&
+																							"text-muted-foreground",
+																					)}
+																				>
+																					{new Date(field.value).toLocaleString(
+																						"id-ID",
+																						{
+																							weekday: "long",
+																							year: "numeric",
+																							month: "long",
+																							day: "numeric",
+																						},
+																					)}
+																					<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+																				</Button>
+																			</FormControl>
+																		</PopoverTrigger>
+																		<PopoverContent
+																			className="w-auto p-0"
+																			align="start"
+																		>
+																			<Calendar
+																				mode="single"
+																				selected={new Date(field.value)}
+																				onSelect={field.onChange}
+																				captionLayout="dropdown"
+																			/>
+																		</PopoverContent>
+																	</Popover>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+														<FormField
+															control={form.control}
+															name="pausedTo"
+															render={({ field }) => (
+																<FormItem>
+																	<FormLabel>Pause To (YYYY-MM-DD)</FormLabel>
+																	<Popover>
+																		<PopoverTrigger asChild>
+																			<FormControl>
+																				<Button
+																					variant={"outline"}
+																					className={cn(
+																						"w-[240px] pl-3 text-left font-normal",
+																						!field.value &&
+																							"text-muted-foreground",
+																					)}
+																				>
+																					{new Date(field.value).toLocaleString(
+																						"id-ID",
+																						{
+																							weekday: "long",
+																							year: "numeric",
+																							month: "long",
+																							day: "numeric",
+																						},
+																					)}
+																					<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+																				</Button>
+																			</FormControl>
+																		</PopoverTrigger>
+																		<PopoverContent
+																			className="w-auto p-0"
+																			align="start"
+																		>
+																			<Calendar
+																				mode="single"
+																				selected={field.value}
+																				onSelect={field.onChange}
+																				captionLayout="dropdown"
+																			/>
+																		</PopoverContent>
+																	</Popover>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+														<DialogFooter>
+															<DialogClose asChild>
+																<Button variant="outline" type="button">
+																	Cancel
+																</Button>
+															</DialogClose>
+															<DialogClose asChild>
+																<Button type="submit" disabled={isPendingPause}>
+																	{isPendingPause
+																		? "Pausing..."
+																		: "Pause Subscription"}
+																</Button>
+															</DialogClose>
+														</DialogFooter>
+													</form>
+												</Form>
+											</DialogContent>
+										</Dialog>
 									</TooltipTrigger>
 									<TooltipContent>
 										<p className="text-sm">Pause Subscription</p>
@@ -250,7 +460,7 @@ export default function OverviewSection() {
 										</p>
 									) : (
 										<p className="flex items-center gap-2 font-semibold text-lg">
-											<Calendar className="h-4 w-4" />
+											<CalendarIcon className="h-4 w-4" />
 											{!nextDeliveryDate && "No upcoming deliveries"}
 											{nextDeliveryDate.toLocaleDateString("id-ID", {
 												weekday: "long",
@@ -301,7 +511,7 @@ export function HistorySubscriptionDialog({
 	history,
 }: {
 	history: {
-		id: number;
+		id: string;
 		plan: number;
 		mealTypes: number[];
 		deliveryDays: number[];
@@ -310,7 +520,7 @@ export function HistorySubscriptionDialog({
 			stars: number;
 			content: string;
 		} | null;
-		date: string;
+		createdAt: string;
 	};
 }) {
 	const form = useForm<EditTestimonialRequest>({
@@ -353,7 +563,7 @@ export function HistorySubscriptionDialog({
 						</p>
 					</div>
 					<span className="text-muted-foreground text-sm">
-						{new Date(history.date).toLocaleDateString("id-ID", {
+						{new Date(history.createdAt).toLocaleDateString("id-ID", {
 							weekday: "long",
 							year: "numeric",
 							month: "long",
@@ -369,7 +579,7 @@ export function HistorySubscriptionDialog({
 							<DialogTitle>
 								Testimonial for{" "}
 								{pricings.find((type) => type.idx === history.plan)?.name} (
-								{new Date(history.date).toLocaleDateString("id-ID", {
+								{new Date(history.createdAt).toLocaleDateString("id-ID", {
 									weekday: "long",
 									year: "numeric",
 									month: "long",
