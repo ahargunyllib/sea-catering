@@ -6,6 +6,7 @@ import { subscription as subscriptionTable } from "../db/schema/subscription";
 import { testimonial as testimonialTable } from "../db/schema/testimonial";
 import { pricings } from "../lib/data/pricings";
 import { protectedProcedure, publicProcedure, router } from "../lib/trpc";
+import { tryCatch } from "../lib/try-catch";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -20,12 +21,20 @@ export const appRouter = router({
 	getCurrentSubscription: protectedProcedure.query(async ({ ctx }) => {
 		const userId = ctx.session.user.id;
 
-		const [subscription] = await db
-			.select()
-			.from(subscriptionTable)
-			.where(eq(subscriptionTable.userId, userId))
-			.orderBy(desc(subscriptionTable.createdAt))
-			.limit(1);
+		const { data: subscriptions, error } = await tryCatch(
+			db
+				.select()
+				.from(subscriptionTable)
+				.where(eq(subscriptionTable.userId, userId))
+				.orderBy(desc(subscriptionTable.createdAt))
+				.limit(1),
+		);
+		if (error) {
+			console.error("Error fetching subscription:", error);
+			throw new Error("Failed to fetch subscription");
+		}
+
+		const subscription = subscriptions[0];
 
 		return {
 			subscription,
@@ -34,22 +43,41 @@ export const appRouter = router({
 	getHistoricalSubscriptions: protectedProcedure.query(async ({ ctx }) => {
 		const userId = ctx.session.user.id;
 
-		const subscriptions = await db
-			.select()
-			.from(subscriptionTable)
-			.where(eq(subscriptionTable.userId, userId))
-			.orderBy(desc(subscriptionTable.createdAt));
+		// const subscriptions = await db
+		//   .select()
+		//   .from(subscriptionTable)
+		//   .where(eq(subscriptionTable.userId, userId))
+		//   .orderBy(desc(subscriptionTable.createdAt));
+
+		const { data: subscriptions, error: fetchSubscriptionsErr } =
+			await tryCatch(
+				db
+					.select()
+					.from(subscriptionTable)
+					.where(eq(subscriptionTable.userId, userId))
+					.orderBy(desc(subscriptionTable.createdAt)),
+			);
+		if (fetchSubscriptionsErr) {
+			console.error("Error fetching subscriptions:", fetchSubscriptionsErr);
+			throw new Error("Failed to fetch subscriptions");
+		}
 
 		const subscriptionIds = subscriptions.map((sub) => sub.id);
-		const testimonials = await db
-			.select()
-			.from(testimonialTable)
-			.where(
-				and(
-					eq(testimonialTable.userId, userId),
-					inArray(testimonialTable.subscriptionId, subscriptionIds),
+		const { data: testimonials, error: fetchTestimonialsErr } = await tryCatch(
+			db
+				.select()
+				.from(testimonialTable)
+				.where(
+					and(
+						eq(testimonialTable.userId, userId),
+						inArray(testimonialTable.subscriptionId, subscriptionIds),
+					),
 				),
-			);
+		);
+		if (fetchTestimonialsErr) {
+			console.error("Error fetching testimonials:", fetchTestimonialsErr);
+			throw new Error("Failed to fetch testimonials");
+		}
 
 		type SubscriptionWithTestimonials = (typeof subscriptions)[0] & {
 			testimonial: {
@@ -122,10 +150,13 @@ export const appRouter = router({
 				totalPrice: totalPrice,
 			};
 
-			const [insertedSubscription] = await db
-				.insert(subscriptionTable)
-				.values(newSubscription)
-				.returning();
+			const { data: insertedSubscription, error } = await tryCatch(
+				db.insert(subscriptionTable).values(newSubscription).returning(),
+			);
+			if (error) {
+				console.error("Error inserting subscription:", error);
+				throw new Error("Failed to create subscription");
+			}
 
 			return {
 				subscription: insertedSubscription,
@@ -144,16 +175,25 @@ export const appRouter = router({
 			const userId = ctx.session.user.id;
 			const { subscriptionId, pausedFrom, pausedTo } = input;
 
-			const [subscription] = await db
-				.select()
-				.from(subscriptionTable)
-				.where(
-					and(
-						eq(subscriptionTable.id, subscriptionId),
-						eq(subscriptionTable.userId, userId),
-					),
-				)
-				.limit(1);
+			const { data: subscriptions, error: fetchSubscriptionErr } =
+				await tryCatch(
+					db
+						.select()
+						.from(subscriptionTable)
+						.where(
+							and(
+								eq(subscriptionTable.id, subscriptionId),
+								eq(subscriptionTable.userId, userId),
+							),
+						)
+						.limit(1),
+				);
+			if (fetchSubscriptionErr) {
+				console.error("Error fetching subscription:", fetchSubscriptionErr);
+				throw new Error("Failed to fetch subscription");
+			}
+
+			const subscription = subscriptions[0];
 
 			if (!subscription) {
 				throw new Error("Subscription not found");
@@ -164,11 +204,17 @@ export const appRouter = router({
 				pausedTo: new Date(pausedTo),
 			};
 
-			const [updated] = await db
-				.update(subscriptionTable)
-				.set(updatedSubscription)
-				.where(eq(subscriptionTable.id, subscriptionId))
-				.returning();
+			const { data: updated, error: updateSubscriptionErr } = await tryCatch(
+				db
+					.update(subscriptionTable)
+					.set(updatedSubscription)
+					.where(eq(subscriptionTable.id, subscriptionId))
+					.returning(),
+			);
+			if (updateSubscriptionErr) {
+				console.error("Error updating subscription:", updateSubscriptionErr);
+				throw new Error("Failed to pause subscription");
+			}
 
 			if (!updated) {
 				throw new Error("Failed to pause subscription");
@@ -189,16 +235,24 @@ export const appRouter = router({
 			const userId = ctx.session.user.id;
 			const { subscriptionId } = input;
 
-			const [subscription] = await db
-				.select()
-				.from(subscriptionTable)
-				.where(
-					and(
-						eq(subscriptionTable.id, subscriptionId),
-						eq(subscriptionTable.userId, userId),
-					),
-				)
-				.limit(1);
+			const { data: subscriptions, error: fetchSubscriptionErr } =
+				await tryCatch(
+					db
+						.select()
+						.from(subscriptionTable)
+						.where(
+							and(
+								eq(subscriptionTable.id, subscriptionId),
+								eq(subscriptionTable.userId, userId),
+							),
+						)
+						.limit(1),
+				);
+			if (fetchSubscriptionErr) {
+				console.error("Error fetching subscription:", fetchSubscriptionErr);
+				throw new Error("Failed to fetch subscription");
+			}
+			const subscription = subscriptions[0];
 
 			if (!subscription) {
 				throw new Error("Subscription not found");
@@ -209,11 +263,17 @@ export const appRouter = router({
 				pausedTo: null,
 			};
 
-			const [updated] = await db
-				.update(subscriptionTable)
-				.set(updatedSubscription)
-				.where(eq(subscriptionTable.id, subscriptionId))
-				.returning();
+			const { data: updated, error: updateSubscriptionErr } = await tryCatch(
+				db
+					.update(subscriptionTable)
+					.set(updatedSubscription)
+					.where(eq(subscriptionTable.id, subscriptionId))
+					.returning(),
+			);
+			if (updateSubscriptionErr) {
+				console.error("Error updating subscription:", updateSubscriptionErr);
+				throw new Error("Failed to resume subscription");
+			}
 
 			if (!updated) {
 				throw new Error("Failed to resume subscription");
@@ -233,40 +293,62 @@ export const appRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const userId = ctx.session.user.id;
 			const { subscriptionId } = input;
-			const [subscription] = await db
-				.select()
-				.from(subscriptionTable)
-				.where(
-					and(
-						eq(subscriptionTable.id, subscriptionId),
-						eq(subscriptionTable.userId, userId),
-					),
-				)
-				.limit(1);
+			const { data: subscriptions, error: fetchSubscriptionErr } =
+				await tryCatch(
+					db
+						.select()
+						.from(subscriptionTable)
+						.where(
+							and(
+								eq(subscriptionTable.id, subscriptionId),
+								eq(subscriptionTable.userId, userId),
+							),
+						)
+						.limit(1),
+				);
+			if (fetchSubscriptionErr) {
+				console.error("Error fetching subscription:", fetchSubscriptionErr);
+				throw new Error("Failed to fetch subscription");
+			}
+			const subscription = subscriptions[0];
 			if (!subscription) {
 				throw new Error("Subscription not found");
 			}
-			await db
-				.update(subscriptionTable)
-				.set({
-					deletedAt: new Date(),
-				})
-				.where(
-					and(
-						eq(subscriptionTable.id, subscriptionId),
-						eq(subscriptionTable.userId, userId),
-					),
-				);
+			// Soft delete the subscription by setting deletedAt
+			const updatedSubscription = {
+				deletedAt: new Date(),
+			};
+			const { data: updated, error: updateSubscriptionErr } = await tryCatch(
+				db
+					.update(subscriptionTable)
+					.set(updatedSubscription)
+					.where(eq(subscriptionTable.id, subscriptionId))
+					.returning(),
+			);
+			if (updateSubscriptionErr) {
+				console.error("Error updating subscription:", updateSubscriptionErr);
+				throw new Error("Failed to cancel subscription");
+			}
+			if (!updated) {
+				throw new Error("Failed to cancel subscription");
+			}
+
 			return {
 				message: "Subscription cancelled successfully",
 			};
 		}),
 	getTestimonials: publicProcedure.query(async () => {
-		const testimonials = await db
-			.select()
-			.from(testimonialTable)
-			.leftJoin(user, eq(testimonialTable.userId, user.id))
-			.orderBy(desc(testimonialTable.createdAt));
+		const { data: testimonials, error } = await tryCatch(
+			db
+				.select()
+				.from(testimonialTable)
+				.leftJoin(user, eq(testimonialTable.userId, user.id))
+				.orderBy(desc(testimonialTable.createdAt)),
+		);
+		if (error) {
+			console.error("Error fetching testimonials:", error);
+			throw new Error("Failed to fetch testimonials");
+		}
 
 		return {
 			testimonials,
@@ -288,11 +370,24 @@ export const appRouter = router({
 			const { content, stars, subscriptionId } = input;
 
 			// Check if subscription exists
-			const [subscription] = await db
-				.select()
-				.from(subscriptionTable)
-				.where(eq(subscriptionTable.id, subscriptionId))
-				.limit(1);
+			const { data: subscriptions, error: fetchSubscriptionErr } =
+				await tryCatch(
+					db
+						.select()
+						.from(subscriptionTable)
+						.where(
+							and(
+								eq(subscriptionTable.id, subscriptionId),
+								eq(subscriptionTable.userId, userId),
+							),
+						)
+						.limit(1),
+				);
+			if (fetchSubscriptionErr) {
+				console.error("Error fetching subscription:", fetchSubscriptionErr);
+				throw new Error("Failed to fetch subscription");
+			}
+			const subscription = subscriptions[0];
 
 			if (!subscription) {
 				throw new Error("Subscription not found");
@@ -306,7 +401,17 @@ export const appRouter = router({
 				userId,
 			};
 
-			await db.insert(testimonialTable).values(testimonial);
+			const { data: insertedTestimonial, error: insertTestimonialErr } =
+				await tryCatch(
+					db.insert(testimonialTable).values(testimonial).returning(),
+				);
+			if (insertTestimonialErr) {
+				console.error("Error inserting testimonial:", insertTestimonialErr);
+				throw new Error("Failed to create testimonial");
+			}
+			if (!insertedTestimonial) {
+				throw new Error("Failed to create testimonial");
+			}
 
 			return {
 				message: "Testimonial created successfully",
