@@ -88,7 +88,7 @@ export default function SignInForm() {
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											autoComplete="email"
-											placeholder="admin@compfest.id"
+											placeholder="Enter your email"
 										/>
 										{field.state.meta.errors.map((error) => (
 											<p key={error?.message} className="text-red-500">
@@ -112,7 +112,7 @@ export default function SignInForm() {
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="P@ssword123"
+											plpaceholder="Enter your password"
 										/>
 										{field.state.meta.errors.map((error) => (
 											<p key={error?.message} className="text-red-500">

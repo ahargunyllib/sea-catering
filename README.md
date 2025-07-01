@@ -71,6 +71,10 @@ pnpm db:push
 ```
 4. Access the web application at [http://localhost:3001](http://localhost:3001) and the API at [http://localhost:3000](http://localhost:3000).
 
+## Credentials
+
+For checking the admin dashboard, you can register a new user with domain `@compfest.id`
+
 ## Project Structure
 
 ```
