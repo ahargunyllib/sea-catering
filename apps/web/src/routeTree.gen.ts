@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MealPlansRouteImport } from './routes/meal-plans'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +20,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const SubscribeRoute = SubscribeRouteImport.update({
   id: '/subscribe',
   path: '/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
   '/subscribe': typeof SubscribeRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
   '/subscribe': typeof SubscribeRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
   '/subscribe': typeof SubscribeRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +89,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/pricing'
+    | '/register'
     | '/subscribe'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/meal-plans' | '/pricing' | '/subscribe'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/meal-plans'
+    | '/pricing'
+    | '/register'
+    | '/subscribe'
   id:
     | '__root__'
     | '/'
@@ -90,6 +107,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/pricing'
+    | '/register'
     | '/subscribe'
   fileRoutesById: FileRoutesById
 }
@@ -99,6 +117,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   PricingRoute: typeof PricingRoute
+  RegisterRoute: typeof RegisterRoute
   SubscribeRoute: typeof SubscribeRoute
 }
 
@@ -109,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/subscribe'
       fullPath: '/subscribe'
       preLoaderRoute: typeof SubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -155,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   PricingRoute: PricingRoute,
+  RegisterRoute: RegisterRoute,
   SubscribeRoute: SubscribeRoute,
 }
 export const routeTree = rootRouteImport
