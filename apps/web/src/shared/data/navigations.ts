@@ -28,4 +28,9 @@ export const navigationItems = [
 			},
 		],
 	},
+	{
+		title: "Dashboard",
+		href: "/dashboard",
+		description: "Your personalized meal plan dashboard.",
+	},
 ];
