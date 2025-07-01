@@ -18,39 +18,25 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import MultipleSelector from "@/shared/components/ui/multi-select";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
+import { DietaryTypes } from "@/shared/data/enums";
+import { MealTypes } from "@/shared/data/meal-types";
+import { pricings } from "@/shared/data/pricings";
+import { WeekDays } from "@/shared/data/week-days";
 import { useFormId } from "@/shared/hooks/use-form-id";
+import { cn } from "@/shared/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Tag, TagInput } from "emblor";
 import { InfoIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
-import MultipleSelector from "../../../shared/components/ui/multi-select";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "../../../shared/components/ui/tooltip";
-import { DietaryTypes } from "../../../shared/data/enums";
-import { pricings } from "../../../shared/data/pricings";
-import { cn } from "../../../shared/lib/utils";
-
-const MealTypes = [
-	{ idx: 1, name: "Breakfast", icon: "🌅" },
-	{ idx: 2, name: "Lunch", icon: "☀️" },
-	{ idx: 3, name: "Dinner", icon: "🌙" },
-];
-
-const WeekDays = [
-	{ idx: 1, name: "Monday", short: "Mon" },
-	{ idx: 2, name: "Tuesday", short: "Tue" },
-	{ idx: 3, name: "Wednesday", short: "Wed" },
-	{ idx: 4, name: "Thursday", short: "Thu" },
-	{ idx: 5, name: "Friday", short: "Fri" },
-	{ idx: 6, name: "Saturday", short: "Sat" },
-	{ idx: 7, name: "Sunday", short: "Sun" },
-];
 
 const subscribechema = z.object({
 	fullName: z.string().min(1, "Full name is required"),
